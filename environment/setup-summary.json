@@ -1,0 +1,19 @@
+{
+  "prepared_at_utc": "2026-10-10T16:13:25.486619+00:00",
+  "phase": "environment_and_scaffold_ready",
+  "project_root": "D:\\ai_study\\PillarMSF",
+  "distro": "PillarMSF-Ubuntu22",
+  "distro_disk": "D:/WSL/PillarMSF-Ubuntu22/ext4.vhdx",
+  "python_venv": "/home/pillar/venvs/pillarmsf",
+  "default_wsl_distro_preserved": "Ubuntu",
+  "core_validation": "environment/validation.json",
+  "pillar_native_validation": "environment/pillar_ops_validation.json",
+  "host_D_free_gib": 113.7,
+  "model_implementation": "learner-owned; modules still empty",
+  "remaining": [
+    "nuScenes mini download and data/label/evaluation integration",
+    "full FutureDet compatibility and baseline run",
+    "user model modules and architecture confirmation",
+    "training and APf ablations"
+  ]
+}

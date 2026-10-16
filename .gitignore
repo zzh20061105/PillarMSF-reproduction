@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+references/
+environment/downloads/
+environment/logs/
+data/*
+!data/README.md
+outputs/*
+!outputs/.gitkeep
+*.so
+build/
+
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+configs/paths.local.json
+*.pem
+*.key
+
+# Checkpoints and local caches
+*.pt
+*.pth
+*.ckpt
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

@@ -1,0 +1,35 @@
+{
+  "timestamp_utc": "2026-10-10T16:02:25.034612+00:00",
+  "status": "passed",
+  "python": "3.10.12",
+  "torch": "2.5.1+cu121",
+  "torch_cuda": "12.1",
+  "numpy": "1.26.4",
+  "spconv_cu120": "2.3.6",
+  "cumm_cu120": "0.4.11",
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU, 8188 MiB, 560.94",
+  "compute_capability": [
+    8,
+    9
+  ],
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2023 NVIDIA Corporation\nBuilt on Mon_Apr__3_17:16:06_PDT_2023\nCuda compilation tools, release 12.1, V12.1.105\nBuild cuda_12.1.r12.1/compiler.32688072_0",
+  "gcc": "gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "checks": {
+    "torch_cuda_forward_backward": "passed",
+    "spconv_2d_subm_downsample_forward_backward": "passed",
+    "spconv_preserves_empty_batch": "passed",
+    "sparse_output_shape": [
+      3,
+      16,
+      4,
+      4
+    ]
+  },
+  "not_verified": [
+    "full FutureDet imports and training",
+    "nuScenes data chain",
+    "PillarMSF model",
+    "APf accuracy",
+    "AMP or multi-GPU"
+  ]
+}

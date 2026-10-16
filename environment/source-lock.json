@@ -1,0 +1,20 @@
+[
+  {
+    "name": "FutureDet",
+    "url": "https://github.com/neeharperi/FutureDet.git",
+    "commit": "960115e2d11e40c569c4fb9abc1f0e066e4a07b1",
+    "clean": true
+  },
+  {
+    "name": "PillarNet",
+    "url": "https://github.com/VISION-SJTU/PillarNet.git",
+    "commit": "0634209fb889c24104d758eae153b9ff4aa0240a",
+    "clean": true
+  },
+  {
+    "name": "nuscenes-forecast",
+    "url": "https://github.com/neeharperi/nuscenes-forecast.git",
+    "commit": "300082bb4cb23df836c4fb7e3c9b0236e248d4f4",
+    "clean": true
+  }
+]

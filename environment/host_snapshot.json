@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-10-10T14:43:45.5002845Z",
+  "project_root": "D:\\ai_study\\PillarMSF",
+  "distro": "PillarMSF-Ubuntu22",
+  "distro_install_root": "D:\\WSL\\PillarMSF-Ubuntu22",
+  "host_os": {
+    "Caption": "Microsoft Windows 11 家庭版 中文版",
+    "Version": "10.0.26200",
+    "TotalVisibleMemorySize": 33341304
+  },
+  "cpu": {
+    "Name": "Intel(R) Core(TM) i9-14900HX",
+    "NumberOfCores": 24,
+    "NumberOfLogicalProcessors": 32
+  },
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU, 8188 MiB, 560.94",
+  "disks": [
+    {
+      "Name": "C",
+      "FreeGiB": 41.66
+    },
+    {
+      "Name": "D",
+      "FreeGiB": 127.35
+    }
+  ]
+}

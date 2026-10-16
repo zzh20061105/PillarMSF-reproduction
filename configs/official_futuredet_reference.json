@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "status": "reference_spec_not_runnable",
+  "implemented": false,
+  "scope": "Pinned official FutureDet VoxelNet baseline; descriptive JSON, no runner consumes this file.",
+  "verified_on": "2026-10-10",
+  "sources": {
+    "futuredet_repository": "https://github.com/neeharperi/FutureDet",
+    "futuredet_commit": "960115e2d11e40c569c4fb9abc1f0e066e4a07b1",
+    "config": "https://github.com/neeharperi/FutureDet/blob/960115e2d11e40c569c4fb9abc1f0e066e4a07b1/configs/centerpoint/nusc_centerpoint_forecast_n3dtf_detection.py",
+    "config_git_blob_sha": "97c9104e8d7830c43fc27ec87786653730e54615",
+    "forecast_sdk_repository": "https://github.com/neeharperi/nuscenes-forecast",
+    "forecast_sdk_commit": "300082bb4cb23df836c4fb7e3c9b0236e248d4f4"
+  },
+  "license_status": {
+    "futuredet": "No repository-wide LICENSE/NOTICE/COPYING found in pinned tree. Some inherited files include MIT notices; verify per-file provenance before direct transplantation.",
+    "forecast_sdk": "LICENSE.txt states Apache-2.0; setup.py metadata states cc-by-nc-sa-4.0 / non-commercial; unresolved upstream inconsistency."
+  },
+  "flags": {
+    "double_flip": false,
+    "two_stage": false,
+    "reverse": false,
+    "sparse": false,
+    "dense": true,
+    "bev_map": false,
+    "forecast_feature": true,
+    "classify": false,
+    "wide_head": false
+  },
+  "tasks": [
+    {
+      "num_class": 1,
+      "class_names": [
+        "car"
+      ]
+    }
+  ],
+  "temporal": {
+    "history_nsweeps": 20,
+    "history_includes_current_scan": true,
+    "history_raw_lidar_sweeps_not_keyframes": true,
+    "point_features": [
+      "x",
+      "y",
+      "z",
+      "intensity",
+      "time_lag"
+    ],
+    "timesteps": 7,
+    "future_includes_current_keyframe": true,
+    "nominal_time_offsets_seconds": [
+      0,
+      0.5,
+      1,
+      1.5,
+      2,
+      2.5,
+      3
+    ],
+    "use_actual_metadata_timestamps_for_geometry_and_association": true
+  },
+  "model": {
+    "type": "VoxelNet",
+    "pretrained": null,
+    "reader": {
+      "type": "VoxelFeatureExtractorV3",
+      "num_input_features": 5
+    },
+    "backbone": {
+      "type": "SpMiddleResNetFHD",
+      "num_input_features": 5,
+      "ds_factor": 8
+    },
+    "neck": {
+      "type": "RPN",
+      "layer_nums": [
+        5,
+        5
+      ],
+      "ds_layer_strides": [
+        1,
+        2
+      ],
+      "ds_num_filters": [
+        128,
+        256
+      ],
+      "us_layer_strides": [
+        1,
+        2
+      ],
+      "us_num_filters": [
+        256,
+        256
+      ],
+      "num_input_features": 256
+    },
+    "bbox_head": {
+      "type": "CenterHead",
+      "in_channels": 512,
+      "share_conv_channel": 64,
+      "dataset": "nuscenes",
+      "timesteps": 7,
+      "weight": 0.25,
+      "code_weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "common_heads": {
+        "reg": [
+          2,
+          2
+        ],
+        "height": [
+          1,
+          2
+        ],
+        "dim": [
+          3,
+          2
+        ],
+        "rot": [
+          2,
+          2
+        ],
+        "vel": [
+          2,
+          2
+        ]
+      },
+      "num_hm_conv_source_default": 2,
+      "dcn_head": false,
+      "recursive_future_features": true,
+      "no_extra_upsampling_deblock": true
+    },
+    "output_stride_inferred_from_official_model": 8
+  },
+  "data": {
+    "dataset_type": "NuScenesDataset",
+    "data_root": null,
+    "data_root_note": "Upstream absolute /home/ubuntu path intentionally omitted; configure at implementation stage.",
+    "version": "v1.0-trainval",
+    "nsweeps": 20,
+    "timesteps": 7,
+    "train_info_basename": "infos_train_20sweeps_withvelo_filter_True.pkl",
+    "val_info_basename": "infos_val_20sweeps_withvelo_filter_True.pkl",
+    "test_info_basename": "infos_test_20sweeps_withvelo_filter_True.pkl",
+    "db_info_basename": "dbinfos_train_20sweeps_withvelo.pkl",
+    "samples_per_gpu": 1,
+    "workers_per_gpu": 4,
+    "voxel_generator": {
+      "range": [
+        -54,
+        -54,
+        -5,
+        54,
+        54,
+        3
+      ],
+      "voxel_size": [
+        0.075,
+        0.075,
+        0.2
+      ],
+      "max_points_in_voxel": 10,
+      "max_voxel_num_train_val": [
+        120000,
+        160000
+      ]
+    },
+    "train_pipeline_types": [
+      "LoadPointCloudFromFile",
+      "LoadPointCloudAnnotations",
+      "Preprocess",
+      "Voxelization",
+      "AssignLabel",
+      "Reformat"
+    ],
+    "val_pipeline_types": [
+      "LoadPointCloudFromFile",
+      "LoadPointCloudAnnotations",
+      "Preprocess",
+      "Empty",
+      "Voxelization",
+      "AssignLabel",
+      "Reformat"
+    ]
+  },
+  "augmentation": {
+    "sampler_type": "trajectory",
+    "shuffle_points_train": true,
+    "global_rot_noise": [
+      -0.78539816,
+      0.78539816
+    ],
+    "global_scale_noise": [
+      0.9,
+      1.1
+    ],
+    "global_translate_std": 0.5,
+    "db_sampler": {
+      "type": "GT-AUG",
+      "enable_field_literal": false,
+      "effective_enable_warning": "Builder/Preprocess do not implement the enable field as a reliable runtime gate; do not infer that sampling is disabled from this literal.",
+      "sample_groups": [
+        {
+          "static_car": 2
+        },
+        {
+          "linear_car": 4
+        },
+        {
+          "nonlinear_car": 6
+        }
+      ],
+      "filter_by_min_num_points": {
+        "car": 5
+      },
+      "filter_by_difficulty": [
+        -1
+      ],
+      "global_random_rotation_range_per_object": [
+        0,
+        0
+      ],
+      "rate": 1,
+      "faded_epoch_scheduler_found": false
+    }
+  },
+  "assigner": {
+    "out_size_factor": 8,
+    "dense_reg": 1,
+    "gaussian_overlap": 0.1,
+    "max_objs": 1000,
+    "min_radius": 2,
+    "radius_mult": true,
+    "sampler_type": "trajectory"
+  },
+  "test_cfg": {
+    "post_center_limit_range": [
+      -61.2,
+      -61.2,
+      -10,
+      61.2,
+      61.2,
+      10
+    ],
+    "max_per_img": 500,
+    "nms": {
+      "use_rotate_nms": true,
+      "use_multi_class_nms": false,
+      "nms_pre_max_size": 1000,
+      "nms_post_max_size": 83,
+      "nms_iou_threshold": 0.2
+    },
+    "score_threshold": 0.1,
+    "pc_range": [
+      -54,
+      -54
+    ],
+    "out_size_factor": 8,
+    "voxel_size": [
+      0.075,
+      0.075
+    ],
+    "double_flip": false
+  },
+  "training_reference": {
+    "total_epochs": 20,
+    "optimizer": {
+      "type": "adam",
+      "amsgrad": 0,
+      "wd": 0.01,
+      "fixed_wd": true,
+      "moving_average": false
+    },
+    "lr_config": {
+      "type": "one_cycle",
+      "lr_max": 0.001,
+      "moms": [
+        0.95,
+        0.85
+      ],
+      "div_factor": 10,
+      "pct_start": 0.4
+    },
+    "grad_clip": {
+      "max_norm": 35,
+      "norm_type": 2
+    },
+    "checkpoint_interval": 1,
+    "log_interval": 25,
+    "upstream_device_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "upstream_dist_backend": "nccl",
+    "hardware_note": "Historical upstream values only; not an instruction or verification of local hardware support."
+  },
+  "distinction_from_pillarmsf_target": {
+    "formal_history_nsweeps": 20,
+    "debug_history_nsweeps_candidate": 10,
+    "debug_history_change_is_not_formal_protocol": true,
+    "afpn_stride_candidate": 8,
+    "afpn_base_channels_candidate": 64,
+    "afpn_output_channels_candidate": 768,
+    "target_head_shared_channels_candidate": 64,
+    "target_design_status": "Paper interpretation and interface hypothesis; user implementation pending. These target values are not the official FutureDet VoxelNet config.",
+    "pointpillars_variant_head_input_channels": 384,
+    "pointpillars_variant_output_stride": 4
+  },
+  "validation": {
+    "source_inspected": true,
+    "json_parse_check_required": true,
+    "model_constructed": false,
+    "data_processed": false,
+    "training_run": false,
+    "metrics_reproduced": false
+  }
+}
+

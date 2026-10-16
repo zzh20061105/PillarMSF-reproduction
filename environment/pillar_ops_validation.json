@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "validated_at_utc": "2026-10-10T16:07:34.181034+00:00",
+  "torch": "2.5.1+cu121",
+  "cuda_runtime": "12.1",
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "extension": "/home/pillar/build/pillar_ops/pillar_cuda.cpython-310-x86_64-linux-gnu.so",
+  "scope": "nonempty FP32/int32 native kernels, CUDA device 0, default stream",
+  "passed": [
+    "pillar indices and point pairs",
+    "flatten valid pairs",
+    "gather forward and gradient kernel",
+    "scatter max forward and gradient kernel"
+  ],
+  "not_tested": [
+    "N=0 / no valid pillars: original kernels are not called",
+    "upstream Python autograd Functions and end-to-end model",
+    "negative scatter features, equal maxima, invalid indices",
+    "ROI edges / 820 valid grid plus 832 storage shape",
+    "AMP/FP16, non-default streams, multiple GPUs",
+    "rotated NMS, DIoU, datasets, training, APf metrics"
+  ]
+}

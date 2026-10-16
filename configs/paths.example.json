@@ -1,0 +1,11 @@
+{
+  "project_root": "/mnt/d/ai_study/PillarMSF",
+  "data_root": "/home/pillar/data/nuscenes",
+  "dataset_version": "v1.0-mini",
+  "cache_root": "/home/pillar/data/pillarmsf_cache/v1.0-mini",
+  "output_root": "/mnt/d/ai_study/PillarMSF/outputs",
+  "note": "历史本机路径示例；当前服务器路径待定。cache_root尚无代码消费，nusc.pkl/gt.pkl隔离或指纹要求未实现。数据尚未下载。",
+  "example_scope": "historical_local_wsl_paths_not_configured_server_paths",
+  "server_paths_configured": false,
+  "cache_root_consumed_by_code": false
+}

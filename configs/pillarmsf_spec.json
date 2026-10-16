@@ -1,0 +1,572 @@
+{
+  "schema_version": 1,
+  "project": "PillarMSF",
+  "status": "planning_spec_only_model_not_implemented",
+  "purpose": "Research target and assumptions ledger; not a runnable training configuration.",
+  "target": "paper_original_method",
+  "paper_source": "C:\\Users\\zengzihang\\Downloads\\SPPCSPC+noIoU+downsample.zip\\papers\\Multi-Scale Point Cloud Fusion-Driven .docx",
+  "data": {
+    "dataset": "nuScenes",
+    "dataset_version": null,
+    "train_split": null,
+    "validation_split": null,
+    "object_classes": [
+      "car"
+    ],
+    "point_cloud_range_m": [
+      -51.2,
+      -51.2,
+      -5.0,
+      51.2,
+      51.2,
+      3.0
+    ],
+    "pillar_size_m": [
+      0.125,
+      0.125,
+      8.0
+    ],
+    "raw_point_features": [
+      "x",
+      "y",
+      "z",
+      "reflectance",
+      "time_delta"
+    ],
+    "nsweeps": 20,
+    "nsweeps_source": "future_det_inherited_not_specified_in_paper",
+    "sweep_registration": "transform_historical_points_into_current_frame",
+    "forecast_horizon_s": 3.0,
+    "future_dt_s": 0.5,
+    "future_steps": 7,
+    "future_label_mask": "inherit_audited_future_det_protocol",
+    "augmentation": {
+      "random_flip_axes": [
+        "x",
+        "y"
+      ],
+      "flip_probability": null,
+      "global_scale_range": [
+        0.95,
+        1.05
+      ],
+      "global_rotation_range_rad": [
+        -0.39269908169872414,
+        0.39269908169872414
+      ],
+      "gt_sampling": {
+        "mode": "faded_ground_truth_copy_paste",
+        "disable_last_epoch": true,
+        "disable_at_epoch_1based": 20,
+        "disable_at_epoch_0based": 19,
+        "fade_schedule": null,
+        "database_and_sampling_groups": null
+      }
+    },
+    "grid": {
+      "roi_extent_xy_m": [
+        102.4,
+        102.4
+      ],
+      "exact_cell_count_xy": [
+        819.2,
+        819.2
+      ],
+      "valid_grid_size_xy": [
+        820,
+        820
+      ],
+      "valid_grid_rounding": "ceil",
+      "storage_grid_size_xy": [
+        832,
+        832
+      ],
+      "storage_alignment_multiple": 16,
+      "padding_side": "positive_x_and_positive_y",
+      "physical_roi_unchanged": true,
+      "last_cell_partially_valid": true,
+      "padded_locations_are_physical_roi": false,
+      "prediction_must_be_filtered_to_physical_roi": true
+    },
+    "future_steps_include_current": true,
+    "future_only_steps": 6,
+    "future_time_offsets_s": [
+      0,
+      0.5,
+      1,
+      1.5,
+      2,
+      2.5,
+      3
+    ],
+    "future_dt_is_nominal_keyframe_interval": true,
+    "association_use_actual_metadata_timestamps": true,
+    "temporal_source": "audited_future_det_reference_and_nuscenes_nominal_keyframe_cadence_not_explicit_pillarMSF_paper",
+    "temporal_alignment_audit": {
+      "gt_indexing": "annotation_next_chain",
+      "prediction_indexing": "scene_sample_offset",
+      "sdk_comparison": "list_position_without_sample_token_alignment_assertion",
+      "alignment_proven_on_actual_data": false,
+      "required_before_formal_training": "audit_per_position_tokens_actual_timestamps_gaps_and_terminal_behavior",
+      "silent_resampling_allowed": false
+    }
+  },
+  "model": {
+    "implementation_status": "assistant_implementation_planned_model_not_yet_implemented",
+    "base_channels_C": 64,
+    "pillar_encoder": {
+      "kind": "dynamic_pillar_mlp_max_pool",
+      "mlp_spec": null
+    },
+    "backbone": {
+      "stage_1_to_4": "sparse_2d_residual",
+      "stage_5": {
+        "stride": 16,
+        "channels": 256,
+        "storage_shape_hw": [
+          52,
+          52
+        ]
+      },
+      "stage_5_conv_units_per_module": 3,
+      "stage_5_module_count": null,
+      "stage_5_kernel_stride_shortcut_details": null,
+      "stage_3": {
+        "stride": 4,
+        "channels": 256,
+        "storage_shape_hw": [
+          208,
+          208
+        ]
+      },
+      "stage_4": {
+        "stride": 8,
+        "channels": 256,
+        "storage_shape_hw": [
+          104,
+          104
+        ]
+      }
+    },
+    "neck": {
+      "kind": "atrous_feature_pyramid_network",
+      "connection_source": "paper_figure_6",
+      "dilation_rates": [
+        1,
+        6,
+        12,
+        18
+      ],
+      "deep_branch_fusion": "concatenate_then_convolution",
+      "lateral_stage_3_and_4": "1x1_conv_then_add",
+      "top_down_upsample": {
+        "kind": "transposed_conv_2d",
+        "kernel_size": 2,
+        "stride": 2
+      },
+      "feature_3_downsample": {
+        "kind": "conv_2d",
+        "kernel_size": 3,
+        "stride": 2
+      },
+      "feature_1_output_upsample": {
+        "kind": "transposed_conv_2d",
+        "kernel_size": 2,
+        "stride": 2
+      },
+      "final_fusion": "concatenate_resized_feature_3_feature_2_resized_feature_1",
+      "output_stride": 8,
+      "output_channels": 768,
+      "output_storage_shape_hw": [
+        104,
+        104
+      ],
+      "add_attention_or_dynamic_weighting": false,
+      "parameter_count_verified": false,
+      "branch_channels": null,
+      "branch_channels_candidates": [
+        256,
+        384,
+        512
+      ],
+      "branch_channels_source": "engineering_candidates_figure5_does_not_specify_selected_width"
+    },
+    "head": {
+      "dimensionality_reduction_kernel_size": 3,
+      "exact_internal_spec": {
+        "reference": "configs/official_futuredet_reference.json",
+        "reference_fields": [
+          "model.bbox_head",
+          "flags.forecast_feature",
+          "temporal"
+        ],
+        "target_status": "starting_interface_design_assumption_not_author_confirmed_model",
+        "target_adaptation": "change_official_voxelnet_head_input_from_512_to_afpn_768_keep_reference_shared64_time7_and_future_feature_design",
+        "implementation_status": "reuse_reference_head_assistant_adaptation_planned_not_yet_implemented"
+      },
+      "current_and_future_heatmaps": true,
+      "decoded_box_fields": [
+        "x_center",
+        "y_center",
+        "z_center",
+        "length",
+        "width",
+        "height",
+        "vx",
+        "vy",
+        "sin_yaw",
+        "cos_yaw"
+      ],
+      "input_channels": 768,
+      "shared_channels": 64,
+      "time_count": 7,
+      "forecast_feats": true,
+      "extra_upsample": false
+    },
+    "activation": {
+      "full_model_kind": "LeakyReLU",
+      "negative_slope": 0.01,
+      "negative_slope_confirmed_by_author": false,
+      "replacement_scope": "backbone_confirmed_other_modules_pending"
+    },
+    "parameter_consistency": {
+      "estimate_basis": "manual_figure_reading_with_C64_not_instantiated_model",
+      "head_estimate_million": 2.783,
+      "head_table_III_million": 2.78,
+      "C64_uniquely_proven": false,
+      "neck_figure_estimate_million": 4.13,
+      "neck_table_III_million": 6.83,
+      "neck_difference_status": "unresolved_do_not_add_modules_just_to_match_count",
+      "neck_figure_estimate_assumptions": "C64_q256_ConvBN_independent_upsample_modules_manual_static_estimate",
+      "neck_branch_width_candidates": [
+        {
+          "q": 256,
+          "estimate_million": 4.1344
+        },
+        {
+          "q": 384,
+          "estimate_million": 5.446144
+        },
+        {
+          "q": 512,
+          "estimate_million": 6.757888
+        }
+      ],
+      "branch_width_selected": null
+    }
+  },
+  "loss": {
+    "heatmap": {
+      "kind": "gaussian_focal",
+      "alpha": 2.0,
+      "beta": 4.0
+    },
+    "box_regression": {
+      "kind": "L1",
+      "component_weights": null
+    },
+    "weights": {
+      "heatmap": 1.0,
+      "box_regression": 0.25,
+      "diou": 0.25
+    },
+    "diou": {
+      "default_mode": "bev2d_axis_aligned",
+      "alternative_mode": "axis_aligned_3d",
+      "default_confirmed_by_author": false,
+      "formula": "1 - IoU + squared_center_distance / squared_enclosing_diagonal",
+      "default_justification": "paper_describes_intersection_and_union_area_not_volume",
+      "default_geometry": "rectangle_xy_plus_or_minus_length_width_over_2_ignoring_yaw",
+      "default_center_distance_dimensions": [
+        "x",
+        "y"
+      ],
+      "alternative_geometry": "volume_iou_xyz_center_distance_ignoring_yaw",
+      "both_modes_ignore_yaw": true,
+      "box_space": "decoded_physical_meters",
+      "gather_at": "valid_gt_center_locations",
+      "valid_object_reduction": "mean",
+      "across_timestep_reduction": null,
+      "mask_invalid_future_targets": true,
+      "empty_target_behavior": "differentiable_zero",
+      "denominator_epsilon": null
+    }
+  },
+  "training": {
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "scheduler": "one_cycle",
+    "max_learning_rate": 0.001,
+    "momentum_range": [
+      0.85,
+      0.95
+    ],
+    "momentum_interpretation": null,
+    "batch_size": 2,
+    "batch_size_interpretation": "global_single_gpu_engineering_assumption",
+    "gradient_accumulation_steps": 1,
+    "epochs": 20,
+    "unspecified": {
+      "initial_learning_rate": null,
+      "final_learning_rate": null,
+      "pct_start": null,
+      "div_factor": null,
+      "final_div_factor": null,
+      "beta2": null,
+      "eps": null,
+      "weight_decay_parameter_groups": null,
+      "gradient_clipping": null,
+      "seed": null,
+      "amp": null,
+      "drop_last": null,
+      "pretrained_initialization": null
+    },
+    "paper_reported_environment_not_current_validation": {
+      "cpu": "Intel i5-13400F",
+      "gpu": "NVIDIA GeForce RTX 3080 12G",
+      "os": "Ubuntu 20.04.6 LTS",
+      "cuda": "11.1",
+      "python": "3.7",
+      "pytorch_version": null,
+      "spconv_version": null
+    }
+  },
+  "decoding": {
+    "kind": "heatmap_local_maxima_and_greedy_backward_matching",
+    "backward_matching_distance_threshold_m": 2.0,
+    "distance_threshold_source": "paper_typical_value_not_author_confirmed",
+    "remaining_parameters": "inherit_audited_future_det_protocol"
+  },
+  "evaluation": {
+    "forecast_top_k": [
+      1,
+      5
+    ],
+    "K_means": "candidate_trajectory_count_not_seconds_or_time_steps",
+    "detection_center_distance_thresholds_m": [
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "motion_categories": [
+      "stationary",
+      "linear",
+      "nonlinear"
+    ],
+    "motion_category_rules": "inherit_audited_future_det_protocol",
+    "forecast_metric": "joint_detection_forecast_APf",
+    "protocol": "inherit_audited_future_det_protocol",
+    "paper_reported_not_reproduced": {
+      "main_table_mAPf_K1_percent": 36.9,
+      "main_table_mAPf_K5_percent": 40.4,
+      "main_table_mAPdet_percent": 76.6,
+      "ablation_full_mAPf_K1_percent": 36.8
+    }
+  },
+  "baselines": [
+    {
+      "id": "future_det_reference",
+      "purpose": "validate_data_training_decoding_evaluation_reference_and_main_table_comparison"
+    },
+    {
+      "id": "paper_pillar_ablation_baseline",
+      "architecture": "pillar_encoder_original_resnet18_prediction_head",
+      "purpose": "controlled_start_for_paper_ablation",
+      "depth_extension": false,
+      "afpn": false,
+      "diou": false,
+      "leaky_relu": false,
+      "neck_spec": null,
+      "head_input_channels": null,
+      "interface_status": "pending_do_not_assume_PillarVTP_neck_equals_ablation_baseline"
+    }
+  ],
+  "ablation_plan": [
+    {
+      "id": "B0",
+      "depth_extension": false,
+      "afpn": false,
+      "diou": false,
+      "leaky_relu": false
+    },
+    {
+      "id": "B1_D",
+      "depth_extension": true,
+      "afpn": false,
+      "diou": false,
+      "leaky_relu": false
+    },
+    {
+      "id": "B2_D_AFPN",
+      "depth_extension": true,
+      "afpn": true,
+      "diou": false,
+      "leaky_relu": false
+    },
+    {
+      "id": "B3_D_AFPN_DIoU",
+      "depth_extension": true,
+      "afpn": true,
+      "diou": true,
+      "leaky_relu": false
+    },
+    {
+      "id": "B4_full",
+      "depth_extension": true,
+      "afpn": true,
+      "diou": true,
+      "leaky_relu": true
+    }
+  ],
+  "provenance": {
+    "paper": [
+      "data.point_cloud_range_m",
+      "data.pillar_size_m",
+      "data.raw_point_features",
+      "data.forecast_horizon_s",
+      "data.augmentation.global_scale_range",
+      "data.augmentation.global_rotation_range_rad",
+      "data.augmentation.gt_sampling.disable_last_epoch",
+      "model.backbone.stage_1_to_4",
+      "model.backbone.stage_5",
+      "model.neck.dilation_rates",
+      "model.neck.connection_source",
+      "model.neck.output_stride",
+      "loss.heatmap.alpha",
+      "loss.heatmap.beta",
+      "loss.weights",
+      "training.optimizer",
+      "training.scheduler",
+      "training.max_learning_rate",
+      "training.weight_decay",
+      "training.momentum_range",
+      "training.batch_size",
+      "training.epochs",
+      "evaluation.forecast_top_k",
+      "evaluation.detection_center_distance_thresholds_m",
+      "ablation_plan"
+    ],
+    "future_det_inherited": [
+      "data.nsweeps",
+      "data.future_label_mask",
+      "evaluation.motion_category_rules",
+      "evaluation.protocol",
+      "decoding.remaining_parameters",
+      "data.object_classes",
+      "data.future_dt_s",
+      "data.future_steps",
+      "data.future_steps_include_current",
+      "data.future_only_steps",
+      "data.future_time_offsets_s",
+      "data.future_dt_is_nominal_keyframe_interval",
+      "data.association_use_actual_metadata_timestamps"
+    ],
+    "engineering_assumption": [
+      "data.grid",
+      "model.base_channels_C",
+      "model.backbone.stage_3.storage_shape_hw",
+      "model.backbone.stage_4.storage_shape_hw",
+      "model.backbone.stage_5.storage_shape_hw",
+      "model.neck.output_channels",
+      "model.neck.output_storage_shape_hw",
+      "model.activation.negative_slope",
+      "loss.diou.default_mode",
+      "loss.diou.valid_object_reduction",
+      "loss.diou.mask_invalid_future_targets",
+      "loss.diou.empty_target_behavior",
+      "training.batch_size_interpretation",
+      "training.gradient_accumulation_steps",
+      "decoding.backward_matching_distance_threshold_m",
+      "model.head.input_channels",
+      "model.head.shared_channels",
+      "model.head.time_count",
+      "model.head.forecast_feats",
+      "model.head.extra_upsample",
+      "model.head.exact_internal_spec",
+      "model.neck.branch_channels_candidates",
+      "model.parameter_consistency.neck_branch_width_candidates"
+    ],
+    "null_means": "unresolved_or_not_yet_copied_from_audited_reference_not_zero_or_disabled",
+    "audited_reference": "configs/official_futuredet_reference.json",
+    "temporal_default_note": "Seven samples include current t0 plus six future keyframes over nominal 3 seconds; 0.5 second is not a replacement for actual metadata timestamps."
+  },
+  "open_questions": [
+    "Confirm grid boundary and padding policy against author configuration.",
+    "Confirm exact Stage5 block count, kernels, strides, and residual shortcuts.",
+    "Resolve neck 4.13M figure estimate versus 6.83M reported parameter count.",
+    "Confirm activation scope and actual LeakyReLU slope.",
+    "Confirm DIoU geometry, differentiability, timestep aggregation, and denominator epsilon.",
+    "Confirm PillarMSF author temporal sampling matches inherited FutureDet nominal dt0.5, current-plus-six-future seven-sample protocol; actual metadata timestamps remain authoritative for geometry and association.",
+    "Complete one-cycle and AdamW parameters; do not substitute constant peak LR or assume SGD momentum.",
+    "Confirm batch2 meaning and effective optimizer batch size.",
+    "Audit inherited protocol values against a pinned FutureDet reference.",
+    "Complete GT database sampling groups and fading schedule; final epoch must disable sampling.",
+    "Fix B0/B1 non-AFPN neck and prediction-head input before their implementation; do not infer from PillarVTP."
+  ],
+  "paper_discrepancies": [
+    {
+      "item": "AFPN_naming_and_dynamic_weights",
+      "details": "Text alternates Attention-based, Atrous, and Adaptive; conclusion mentions dynamic weighted fusion without definition; follow explicit Figure6 connections and do not add attention or weights."
+    },
+    {
+      "item": "K1_main_and_ablation",
+      "main_table": {
+        "stationary": 69.3,
+        "linear": 30.0,
+        "nonlinear": 11.4,
+        "mAPf": 36.9
+      },
+      "ablation_full": {
+        "stationary": 69.3,
+        "linear": 29.6,
+        "nonlinear": 11.4,
+        "mAPf": 36.8
+      },
+      "policy": "retain_both_reports_do_not_invent_explanation"
+    },
+    {
+      "item": "K_misnamed_as_horizon",
+      "details": "One passage calls K5 a prediction horizon; evaluation text defines topK candidate count, while time horizon is 3 seconds."
+    }
+  ],
+  "spec_updated_on": "2026-10-15",
+  "execution_plan": {
+    "route": "server_for_gpu_data_training_evaluation_local_editing",
+    "server_rented": false,
+    "server_validated": false,
+    "budget_amount": null,
+    "budget_preference": "on_demand_cost_saving",
+    "primary_framework": "pinned_FutureDet_reuse_existing_runner_data_head_decode_evaluation_with_minimal_adaptation",
+    "initial_runtime_target": "single_gpu_fp32_small_batch_mini_not_yet_run",
+    "deferred_until_needed": [
+      "full_runner_rewrite",
+      "full_sdk_rewrite",
+      "old_checkpoint_layout_conversion",
+      "AMP",
+      "DDP"
+    ],
+    "plan_document": "docs/execution_plan.md",
+    "platform_to_compare": "AutoDL",
+    "autodl_account_registered": false,
+    "current_step": "L1_prepare_execution_workspace_and_interfaces",
+    "actual_instance_selected": false,
+    "actual_instance_hourly_price": null,
+    "current_step_status": "planned_not_yet_implemented",
+    "server_selection_parallel_not_local_code_prerequisite": true,
+    "gpu_acceptance_gate": "actual_CUDA_native_and_end_to_end_forward_backward_with_real_data",
+    "local_scope": "source_configuration_and_independent_CPU_checks_no_full_local_GPU_training"
+  },
+  "collaboration": {
+    "implementation_owner": "assistant",
+    "adaptation_and_test_owner": "assistant",
+    "user_role": [
+      "progress_review",
+      "code_and_assumption_review",
+      "questions",
+      "resource_and_cost_decisions"
+    ],
+    "user_handwritten_models_required": false,
+    "supersedes_prior_learner_owned_implementation_arrangement_on": "2026-10-15"
+  }
+}

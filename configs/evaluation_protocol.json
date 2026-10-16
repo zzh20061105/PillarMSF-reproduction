@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "status": "evaluation_spec_not_runnable",
+  "implemented": false,
+  "verified_on": "2026-10-10",
+  "sources": {
+    "futuredet_commit": "960115e2d11e40c569c4fb9abc1f0e066e4a07b1",
+    "forecast_sdk_commit": "300082bb4cb23df836c4fb7e3c9b0236e248d4f4",
+    "benchmark_usage": "https://github.com/neeharperi/FutureDet/blob/960115e2d11e40c569c4fb9abc1f0e066e4a07b1/README.md",
+    "wrapper": "https://github.com/neeharperi/FutureDet/blob/960115e2d11e40c569c4fb9abc1f0e066e4a07b1/evaluate.py",
+    "sdk_config": "https://github.com/neeharperi/nuscenes-forecast/blob/300082bb4cb23df836c4fb7e3c9b0236e248d4f4/python-sdk/nuscenes/eval/detection/configs/detection_forecast_cohort.json",
+    "sdk_algo": "https://github.com/neeharperi/nuscenes-forecast/blob/300082bb4cb23df836c4fb7e3c9b0236e248d4f4/python-sdk/nuscenes/eval/detection/algo.py",
+    "sdk_evaluate": "https://github.com/neeharperi/nuscenes-forecast/blob/300082bb4cb23df836c4fb7e3c9b0236e248d4f4/python-sdk/nuscenes/eval/detection/evaluate.py",
+    "sdk_loaders": "https://github.com/neeharperi/nuscenes-forecast/blob/300082bb4cb23df836c4fb7e3c9b0236e248d4f4/python-sdk/nuscenes/eval/common/loaders.py"
+  },
+  "formal_dataset": {
+    "name": "nuScenes",
+    "version": "v1.0-trainval",
+    "training_split": "train",
+    "evaluation_split": "val",
+    "class_name": "car",
+    "history_nsweeps": 20,
+    "history_includes_current_scan": true,
+    "timesteps": 7,
+    "includes_current_keyframe": true,
+    "nominal_time_offsets_seconds": [
+      0,
+      0.5,
+      1,
+      1.5,
+      2,
+      2.5,
+      3
+    ],
+    "nominal_forecast_horizon_seconds": 3,
+    "nominal_future_keyframe_interval_seconds": 0.5,
+    "geometry_uses_actual_timestamps": true
+  },
+  "debug_dataset": {
+    "version": "v1.0-mini",
+    "training_split": "mini_train",
+    "evaluation_split": "mini_val",
+    "history_nsweeps_formal_default": 20,
+    "history_nsweeps_optional_debug_hypothesis": 10,
+    "debug_override_must_be_named_and_recorded": true,
+    "paper_metric_comparison_allowed": false,
+    "purpose": "Interface and small-run checks only; mini completion is not scientific metric reproduction."
+  },
+  "forecast_flags": {
+    "forecast": 7,
+    "forecast_mode": "velocity_dense",
+    "forecast_mode_note": "FutureDet README benchmark explicitly uses velocity_dense; wrapper default velocity_forward belongs to another association protocol.",
+    "classname": "car",
+    "rerank": "last",
+    "cohort_analysis": true,
+    "K_values_to_report": [
+      1,
+      5
+    ],
+    "C": 1,
+    "static_only": false,
+    "association_oracle": false,
+    "jitter": false,
+    "postprocess": false,
+    "nogroup": false,
+    "tp_pct": 0.6,
+    "tp_pct_note": "Auxiliary ADE/FDE at recall percentage; not the joint APf threshold or forecast horizon.",
+    "extractBox_and_eval_only_note": "Execution modes, not metric definitions. Adapter not implemented."
+  },
+  "sdk_config_reference": {
+    "class_range_meters": {
+      "static_car": 50,
+      "linear_car": 50,
+      "nonlinear_car": 50,
+      "static_pedestrian": 40,
+      "linear_pedestrian": 40,
+      "nonlinear_pedestrian": 40
+    },
+    "dist_fcn": "center_distance",
+    "dist_ths": [
+      0.5,
+      1,
+      2,
+      4
+    ],
+    "dist_th_tp": 2,
+    "forecast_th": 5,
+    "forecast_th_note": "Literal upstream config field; not the number of forecast steps or the 3-second horizon.",
+    "min_recall": 0.1,
+    "min_precision": 0.1,
+    "max_boxes_per_sample": 500,
+    "mean_ap_weight": 5,
+    "prediction_count_enforcement_note": "Upstream load_prediction comments out its max-count assertion; future adapter must explicitly check the export contract rather than assuming SDK enforcement."
+  },
+  "joint_apf": {
+    "current_center_distance_thresholds_meters": [
+      0.5,
+      1,
+      2,
+      4
+    ],
+    "last_car_center_distance_thresholds_meters": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "threshold_comparison": "Current detection: distance < threshold. Final joint APf success: distance <= threshold because miss_rate marks distance > threshold as a miss.",
+    "definition": "Current detection matches a GT object, and that same object's last forecast box is within the corresponding final threshold.",
+    "sdk_function": "calc_fap_mr",
+    "metrics_summary_field": "mean_dist_faps_mr",
+    "car_cohorts": [
+      "static_car",
+      "linear_car",
+      "nonlinear_car"
+    ],
+    "aggregation": "Arithmetic mean of the three car cohort mean_dist_faps_mr values.",
+    "display_scale": 100,
+    "report_K_separately": true,
+    "not_equivalent_fields": [
+      "mean_dist_faps",
+      "mean_fap"
+    ],
+    "not_equivalent_note": "mean_dist_faps uses future-only precision; SDK global mean may include pedestrian cohorts.",
+    "current_threshold_operator": "<",
+    "last_threshold_operator": "<="
+  },
+  "candidate_grouping": {
+    "group_key": "forecast_id",
+    "candidate_rank_key": "forecast_score",
+    "rerank_last_semantics": "Use the final predicted detection score to assign forecast_score.",
+    "top_K_selection_scope": "evaluation_only",
+    "ground_truth_min_FDE_selection_within_top_K_is_sdk_metric_logic": true,
+    "ground_truth_must_not_enter_inference_candidate_selection": true,
+    "association_branch_scope": "Pinned FutureDet velocity_dense reference; exact PillarMSF forward/constant/backcast branch inclusion to be confirmed during implementation."
+  },
+  "prediction_contract": {
+    "coordinates": "nuScenes global",
+    "current_detection_fields": [
+      "sample_token",
+      "translation",
+      "size",
+      "rotation",
+      "velocity",
+      "detection_name",
+      "detection_score",
+      "attribute_name"
+    ],
+    "forecast_fields": [
+      "forecast_id",
+      "forecast_score",
+      "forecast_boxes"
+    ],
+    "forecast_box_count": 7,
+    "rotation_representation": "Quaternion elements [w,x,y,z]",
+    "size_order": "width,length,height",
+    "timestamps": "Resolve each forecast sample_token from nuScenes metadata; nominal offsets are descriptive."
+  },
+  "gt_and_mask": {
+    "training_missing_future_behavior": "Repeat the final available annotation after next is empty.",
+    "training_future_validity_mask_present_in_upstream": false,
+    "assign_label_mask_meaning": "Valid box dimensions and center within output feature grid; not trajectory-completeness validity.",
+    "evaluation_missing_future_behavior": "forecast_annotation returns None if next is empty at any of the seven loop iterations, including after appending the seventh existing box.",
+    "preserve_author_train_eval_difference_for_first_official_comparison": true,
+    "strict_future_mask_change_requires_separate_protocol_variant": true
+  },
+  "cache_requirement": {
+    "upstream_cache_basename": "gt.pkl",
+    "upstream_cache_fingerprint_covers_split_version_horizon": false,
+    "required_adapter_fingerprint_fields": [
+      "dataset_root_or_manifest",
+      "dataset_version",
+      "split",
+      "forecast_steps",
+      "sdk_commit",
+      "gt_schema_version",
+      "cohort_protocol"
+    ],
+    "adapter_implemented": false,
+    "upstream_cache_basenames": [
+      "nusc.pkl",
+      "gt.pkl"
+    ],
+    "nusc_cache_fingerprint_fields": [
+      "dataset_root_or_manifest",
+      "dataset_version",
+      "metadata_fingerprint",
+      "sdk_commit"
+    ],
+    "example_cache_root_is_consumed_by_code": false,
+    "path_isolation_or_fingerprint_audit_implemented": false
+  },
+  "validation": {
+    "json_parse_check_only": true,
+    "evaluation_adapter_available": false,
+    "sdk_import_tested_in_current_environment": false,
+    "model_inference_run": false,
+    "full_trainval_metrics_reproduced": false
+  },
+  "spec_updated_on": "2026-10-13",
+  "temporal_alignment_audit": {
+    "gt_indexing": "annotation_next_chain",
+    "prediction_indexing": "scene_sample_offset",
+    "sdk_comparison": "list_position_without_sample_token_alignment_assertion",
+    "alignment_proven_on_actual_data": false,
+    "required_before_formal_training": "audit_per_position_tokens_actual_timestamps_gaps_and_terminal_behavior",
+    "silent_resampling_allowed": false
+  }
+}
