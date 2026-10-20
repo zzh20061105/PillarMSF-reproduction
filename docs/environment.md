@@ -1,21 +1,52 @@
 # 当前执行边界与历史环境记录
 
-更新：2026-10-16。全部实际训练在服务器进行，本机只进行代码构建、阅读与调试。服务器尚未租用、配置或验证；预算和实例由用户决定。
+更新：2026-10-20。本机可按批准的小任务准备数据、做 GPU 推理和调试；全部实际训练仍在服务器进行。服务器尚未就绪，预算和实例由用户决定。当前进度见 [进度总览](进度总览.md)。
 
 | 地点 | 当前安排 |
 | --- | --- |
-| 本机 | 源码/配置编辑、Git 操作、语法与独立接口检查、小规模 CPU 数值/形状/梯度调试；不启动任何训练 |
-| 服务器 | CUDA 原生算子及 GPU 整网验收、真实数据完整闭环、mini/短训练、正式训练、显存/吞吐及正式评价 |
+| 本机 | 源码/配置编辑、Git 操作、语法与独立接口检查、CPU 数据准备和标签审计、轻量数值/形状/梯度调试，以及按批次批准的 GPU 推理和调试 |
+| 服务器 | 全部实际训练（含 CPU、mini、短训练）、训练闭环与正式 GPU 验收、显存/吞吐及正式实验 |
 
-本机的模块梯度检查不包含优化器训练。现有 WSL 可保留作历史参考或已说明的轻量调试；本轮不重装、不升级、不删除环境，也不运行已有 CUDA 自检。环境变更或运行任务按 implementation_boundary.md 的小任务确认规则执行。
+本机的模块梯度检查不包含优化器训练。方向许可不等于某次运行已获批准；安装依赖、处理数据和执行 GPU 任务仍按 [实现与执行边界](implementation_boundary.md) 先说明范围、确认后实施，遇到版本或任务偏离先停下说明。
 
-environment/ 保存安装配方、依赖版本和历史证据，不是服务器已就绪的证明。现有依赖只作服务器候选；取得实例后按真实 OS、GPU、驱动、Toolkit、编译器和路径重建环境、重编扩展并验收。不复制本机 venv 或 .so 作为可用服务器环境。
+## 当前本机环境与数据
 
-下文是历史本机 WSL 的安装及有限检查记录，旧命令、硬件和“通过”均只对应当时范围，不是当前默认启动流程。服务器准备见 [server_preflight.md](server_preflight.md)。
+- 使用现有 WSL `PillarMSF-Ubuntu22` 和 `/home/pillar/venvs/pillarmsf`，已用于 mini 数据准备；不能将整个 WSL 环境称为仅供历史参考。
+- mini 数据根为 `/home/pillar/data/nuscenes/`，两份索引在 `mini_forecast/`。10 月 19 日只读检查确认文件存在和大小，没有重新生成或复核样本统计，详见 [数据说明](../data/README.md)。
+- `/home/pillar/build/pillar_ops` 等构建副本及旧自检报告属于历史证据，不代表当前数据链、模型或服务器已经验收。
+- 本批仅用现有 venv 的 `pip list --format=json`、`pip freeze` 只读查询包信息并同步配方、快照与说明；没有安装、卸载或升级依赖，没有导入 Torch/SDK 或重跑 CUDA、数据和模型任务。
+
+## 当前安装配方与版本快照（2026-10-20）
+
+- [requirements-core.txt](../environment/requirements-core.txt) 保留原有6项固定依赖，新增 mini 准备使用的10项直接依赖：OpenCV headless、pyquaternion、tqdm、shapely、matplotlib、scikit-learn、pillow、cachetools、pandas、motmetrics。精确版本来自本次查询，以该文件为准，不倒写为10月18日已完整记录的版本。
+- [requirements-resolved.txt](../environment/requirements-resolved.txt) 保存本次真实 `pip freeze` 输出，包括传递依赖；freeze 默认不列部分引导工具，setuptools、wheel 的固定值仍在 core。该文件是环境记录，不是完整可移植锁或服务器安装入口。
+- 本次包信息为 `numpy 1.26.4`、`torch 2.5.1+cu121`、`spconv-cu120 2.3.6`，与原固定值一致。此处只说明包元数据，不能升级为当前导入、CUDA 或整网验证通过。
+- 现有 [install_python.sh](../environment/install_python.sh) 先安装 Torch cu121，再读取 core 和安装本地项目，因此无需新增安装入口；[constraints-torch.txt](../environment/constraints-torch.txt) 继续只约束 nvjitlink，NumPy 由 core 固定。本批未执行安装脚本，也未做重新安装验收。
+- 安装脚本仍限定 `pillar` 用户、Ubuntu 22.04 和 `/mnt/d/ai_study/PillarMSF` 等本机约定；不是通用服务器部署脚本。服务器需按目标设备与路径适配后验收。
+
+本次 freeze 的项目条目是 `-e git+https://github.com/zzh20061105/PillarMSF-reproduction.git@bf3d213b1c1e588aa83cb238ac221a0cd0920ace#egg=pillarmsf_reproduction`。它记录 pip 识别到的 Git 来源和 HEAD，不包含当前未提交改动，也不表示工作区与该提交完全一致；现有 editable 项目位置由 `pip list` 查询为 `/mnt/d/ai_study/PillarMSF`。迁移时应使用待用户审核保存的实际源码，不直接用这条 freeze 项替代项目交付。
+
+已有mini生成入口仍显式加载固定reference SDK；2.2合成评价检查仅在本次进程显式加载third_party/nuscenes-forecast/python-sdk，不改全局PYTHONPATH或已安装包。core不另装同名现代nuscenes-devkit。OpenPCDet/PillarNeXt 及 torch_scatter 等仍为候选，不因整理而提前安装或当作已完成适配。运行与版本偏离历史见 [工作记录](work_log.md)。
+
+### 10 月 18 日依赖变更记录
+
+此前会话记录安装了 `opencv-python-headless 4.10.0.84`、`pyquaternion`、`tqdm`、`shapely`、`matplotlib`、`scikit-learn`、`Pillow`、`cachetools`、`pandas`、`motmetrics 1.4.0` 及连带包；使用约束保留 `numpy 1.26.4`、`torch 2.5.1+cu121`、`spconv 2.3.6`。这些是原会话的安装与有限检查记录，本批没有重测运行状态。
+
+原记录中 `motmetrics 1.1.3` 因 Python 3.10 移除 `collections.Iterable` 无法导入，执行时改为 `1.4.0`。安装任务已获批，但该换版未事先获批；目前只记录导入兼容处理，不能据此认定 tracking 评价正确，也不在本批自动回退。
+
+本次已补齐 core 的直接依赖和实际 freeze 记录；历史 `validation.json`、`pillar_ops_validation.json` 等运行报告保持原样，不因新快照更新为新的验证结果。
+
+## 服务器迁移边界
+
+`environment/` 保存安装配方、依赖版本和历史证据，不是服务器已就绪的证明。取得实例后，按真实 OS、GPU、驱动、Toolkit、编译器和路径重建环境、重编扩展并验收。不复制本机 venv 或 `.so` 作为可用服务器环境；含本机绝对路径的 mini 索引也需在目标路径重新生成。服务器准备见 [server_preflight.md](server_preflight.md)。
+
+下文保留此前 WSL 安装及有限检查的原始记录。旧命令、硬件和“通过”只对应当时范围；其中“尚未下载”“在服务器运行数据与模型”等旧状态由上文更新，不作为当前默认启动流程或任务授权。
 
 ---
 
 # 历史 WSL 环境与复现入口
+
+以下为历史记录；当前环境、数据状态和运行边界以上文为准。
 
 此前已建立 WSL2 发行版 `PillarMSF-Ubuntu22`，Ubuntu 22.04.5 LTS。
 
@@ -35,7 +66,7 @@ environment/ 保存安装配方、依赖版本和历史证据，不是服务器�
 - PyTorch 2.5.1，官方 cu121 wheel
 - CUDA Toolkit 12.1，仅工具包，不安装 Linux NVIDIA 驱动
 - spconv-cu120 2.3.6（此 CUDA wheel 的版本与 CPU spconv 发布号不同）
-- NumPy 1.26.4，旧 SDK 的 np.float 仍需后续局部适配
+- NumPy 1.26.4；2.2已在SDK工作副本替换评价六处np.float并通过合成样例，地图np.bool保持原样、暂不测试；完整评价仍待验
 - nvidia-nvjitlink-cu12 12.1.105，额外固定这一原本无版本上限的 CUDA 依赖
 - GCC/G++ 11，CMake、Ninja；native 目标架构 8.9，MAX_JOBS=2
 
@@ -57,7 +88,7 @@ wsl -d PillarMSF-Ubuntu22 -u pillar -- bash /mnt/d/ai_study/PillarMSF/environmen
 
 ## 验证范围
 
-安装日志在 `environment/logs/`，具体版本与运行结果分别见 `environment/requirements-resolved.txt`、`environment/validation.json`。
+历史安装日志在 `environment/logs/`，当时运行结果见 `environment/validation.json`。`environment/requirements-resolved.txt` 已在2026-10-20刷新为当前包快照，不再是这次历史验证时点的版本清单。
 
 环境自检覆盖小型 Torch CUDA 前反向、spconv 2D 子流形及下采样卷积前反向、保留空样本 batch、nvcc 版本。Pillar 算子另有独立构建与非空 FP32/int32 自检；参考源码保持原样。
 

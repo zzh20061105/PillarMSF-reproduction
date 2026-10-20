@@ -530,32 +530,42 @@
       "details": "One passage calls K5 a prediction horizon; evaluation text defines topK candidate count, while time horizon is 3 seconds."
     }
   ],
-  "spec_updated_on": "2026-10-15",
+  "spec_updated_on": "2026-10-20",
   "execution_plan": {
-    "route": "server_for_gpu_data_training_evaluation_local_editing",
+    "route": "local_data_preparation_and_approved_GPU_inference_debugging_all_training_on_server",
     "server_rented": false,
     "server_validated": false,
     "budget_amount": null,
     "budget_preference": "on_demand_cost_saving",
     "primary_framework": "pinned_FutureDet_reuse_existing_runner_data_head_decode_evaluation_with_minimal_adaptation",
-    "initial_runtime_target": "single_gpu_fp32_small_batch_mini_not_yet_run",
+    "initial_runtime_target": "official_FutureDet_weights_inference_decode_evaluation_on_mini_not_yet_run",
     "deferred_until_needed": [
       "full_runner_rewrite",
       "full_sdk_rewrite",
-      "old_checkpoint_layout_conversion",
       "AMP",
-      "DDP"
+      "DDP",
+      "forecast_SDK_map_compatibility_and_map_tests"
     ],
-    "plan_document": "docs/execution_plan.md",
+    "plan_document": "docs/进度总览.md",
+    "stage_numbering": "stages_1_to_5_subtasks_stage.step",
+    "current_research_stage": 2,
+    "data_step_status": "1.1_and_1.2_mini_car_checks_complete_data_unchanged_in_2.2",
+    "first_round_training": "B4_full_only_20_epochs_on_server",
+    "reference_baseline": "official_FutureDet_weights_inference_and_evaluation_no_retraining",
+    "ablation_scope": "B0_to_B3_deferred_pending_results_budget_and_approval",
+    "checkpoint_compatibility_scope": "official_FutureDet_weights_only_as_a_separately_approved_task",
     "platform_to_compare": "AutoDL",
     "autodl_account_registered": false,
-    "current_step": "L1_prepare_execution_workspace_and_interfaces",
+    "futuredet_working_copy": "third_party/FutureDet",
+    "current_step": "2.2_forecast_SDK_numpy_float_compatibility",
     "actual_instance_selected": false,
     "actual_instance_hourly_price": null,
-    "current_step_status": "planned_not_yet_implemented",
+    "current_step_status": "six_float_aliases_adapted_synthetic_checks_passed_pending_user_review",
+    "next_research_task": "scope_2.3_official_weights_checkpoint_and_inference_requirements",
     "server_selection_parallel_not_local_code_prerequisite": true,
     "gpu_acceptance_gate": "actual_CUDA_native_and_end_to_end_forward_backward_with_real_data",
-    "local_scope": "source_configuration_and_independent_CPU_checks_no_full_local_GPU_training"
+    "local_scope": "editing_CPU_data_preparation_checks_and_approved_GPU_inference_debugging_no_training",
+    "forecast_sdk_working_copy": "third_party/nuscenes-forecast"
   },
   "collaboration": {
     "implementation_owner": "assistant",
@@ -567,6 +577,11 @@
       "resource_and_cost_decisions"
     ],
     "user_handwritten_models_required": false,
-    "supersedes_prior_learner_owned_implementation_arrangement_on": "2026-10-15"
+    "supersedes_prior_learner_owned_implementation_arrangement_on": "2026-10-15",
+    "rules_document": "docs/implementation_boundary.md",
+    "approval_policy": "confirm_one_scoped_task_before_implementation_then_stop_for_user_review",
+    "documentation_sync": "update_actually_affected_README_progress_environment_recipe_and_specs_in_the_same_approved_batch",
+    "engineering_policy": "minimal_task_related_checks_no_speculative_defensive_frameworks_source_checker_frozen",
+    "code_comments": "necessary_Chinese_comments"
   }
 }
